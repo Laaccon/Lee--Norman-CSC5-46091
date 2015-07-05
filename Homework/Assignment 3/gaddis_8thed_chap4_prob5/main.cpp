@@ -33,11 +33,16 @@ int main() {
 	BMI = weight * 703 / (height * height);
           
 	//Output	
-	if (BMI > over) {
+	if (BMI > over) 
+        {
 		cout << "You are overweight.\n";
-	} else if (BMI < under) {
+        } 
+        else if (BMI < under) 
+        {
 		cout << "You are underweight.\n";
-	} else {
+        } 
+        else 
+        {
             cout << "You are at an optimal weight.\n";
         }
 	return 0;

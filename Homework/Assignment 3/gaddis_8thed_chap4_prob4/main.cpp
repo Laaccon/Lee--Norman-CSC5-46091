@@ -22,9 +22,9 @@ int main() {
 	float width1, width2, length1, length2, area1, area2;
 	
 	//Input and prompt
-	cout << "Enter the width and length of the first rectangle:\n";
+	cout << "Enter the width and length of the first rectangle (separated by a space):\n";
 	cin >> width1 >> length1;
-	cout << "Enter the width and length of the second rectangle:\n";
+	cout << "Enter the width and length of the second rectangle (separated by a space):\n";
 	cin >> width2 >> length2;
 
 	//Calculate area
@@ -33,11 +33,17 @@ int main() {
 
 	//Compare the areas
 	if (area1 > area2)
+        {
 		cout << "the first rectangle is bigger\n";
+        }
 	else if (area1 < area2) 
+        {
 		cout <<  "the second rectangle is bigger\n";
+        }
 	else
-		cout << "Both the rectangles are equal\n";	
+        {
+		cout << "Both the rectangles are equal\n";
+        }
 	
 	return 0;
 }
