@@ -29,16 +29,16 @@ int main() {
         
 	//Calculate
 	if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)
-	{
+		{
 		cout << "That month has 31 days.";
-	}
+		}
 	else if (month == 4 || month == 6 || month == 9 || month == 11)
-	{
+		{
 		cout << "That month has 30 days.";
-        }
+                }
 	else if (month == 2)
-	{
-			if (year % 4 == 0)
+		{
+			if (year % 4 == 0 && year % 100 == 0 && year % 200 == 0) //Check for leap year
 				{
 				cout << "This month has 29 days.";
 				}
@@ -46,11 +46,11 @@ int main() {
 				{
 				cout << "This month has 28 days.";
 				}
-	}
+		}
 	else
-	{
+		{
 		cout << "Error: Invalid input";
-	}
+		}
 	
 	return 0;
 }
