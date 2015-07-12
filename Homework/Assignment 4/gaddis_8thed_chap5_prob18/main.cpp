@@ -48,6 +48,7 @@ int main() {
         {
             cout << "Error opening the file.\n";
         }
-       
+        //Close File
+        inputFile.close();
 	return 0;
 }
