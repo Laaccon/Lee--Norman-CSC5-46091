@@ -15,7 +15,7 @@ using namespace std;
 
 //Function Prototypes
 void header();
-char grab();
+char grab(bool &, bool &);
 char roll(char);
 void clear();
 void play(bool &, unsigned short &, unsigned short &, int [], short &, string);
@@ -79,9 +79,9 @@ int main(int argc, char** argv) {
 //***********************************grab***************************************
 // Purpose: Simulate grabbing a dice out of the bag and getting a random color
 // Outputs: color -> g = green, r = red, y = yellow
-char grab()
+char grab(bool &pturn, bool &again)
 {
-    char color, play;
+    char color, rolling;
     short val;
     val = rand()% 10 + 1;
     //determine color of dice grabbed
@@ -101,6 +101,19 @@ char grab()
             cout << "A Yellow Dice has been pulled out of the bag.\n";
         }
     return (color);
+	//Check if user wants to roll
+	if (pturn == true)
+	{
+		do
+		{	
+			cout << "Do you wish to roll the dice?(y/n)
+			cin >> rolling;
+			if (rolling == 'n')
+			{
+				again = false;
+			}
+		}while (rolling != 'y' || rolling != 'n');
+	}	
 }
 
 //***********************************roll****************************************
@@ -282,6 +295,13 @@ void play(bool &again, unsigned short &rndPts, unsigned short &strike, int score
         {
             result(rndPts, strike);
         }
+		else if (again == false)
+		{
+		    score[0] += rndPts;
+            rndPts = 0;
+            strike = 0;
+            cout << "Added point(s) to total. ";
+		}
         /*switch(playing)
         {
             case('y'):
@@ -290,8 +310,8 @@ void play(bool &again, unsigned short &rndPts, unsigned short &strike, int score
                 break;
             }
             case('n'):
+          o      again = false;
             {
-                again = false;
                 //Add round points to total score and reinitialize
                 score[0] += rndPts;
                 rndPts = 0;
@@ -311,8 +331,6 @@ void play(bool &again, unsigned short &rndPts, unsigned short &strike, int score
         else
         {
             cout << pTeam << " member <" << round << "> has " << rndPts << " points this round and " << strike  << " strikes. " << pTeam << " has " << score[0] << " total points.\n";
-            cout << "Do you want to roll again (y/n)?";
-            cin >> playing;
         }
     }
 }
