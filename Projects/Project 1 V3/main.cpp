@@ -75,6 +75,8 @@ int main(int argc, char** argv) {
     }
     return 0;
 }
+
+//***********************************grab***************************************
 // Purpose: Simulate grabbing a dice out of the bag and getting a random color
 // Outputs: color -> g = green, r = red, y = yellow
 char grab()
@@ -101,6 +103,7 @@ char grab()
     return (color);
 }
 
+//***********************************roll****************************************
 //Purpose: Roll a dice and get a weighted outcome based on the color
 //Input: dice -> the color of dice 
 //Output: rslt -> weighted results, green has the highest positive outcome, reds have the lowest
@@ -156,7 +159,14 @@ char roll(char dice)
     return (rslt);
 }
 
+//**************************result***********************************
 //Purpose: Add points or strike and output ascii picture
+//Inputs:
+//	rndPts -> points for this round
+//	strike -> number of strikes
+//Outputs:
+//	rndPts
+//	strike
 void result(unsigned short &rndPts, unsigned short &strike)
 {
     char rslt, color; // copied values for color and the value you get from rolling
@@ -245,10 +255,24 @@ void clear()
     }
 }
 
-//Purpose play dice 
+//*******************************play*********************
+//Purpose: Player's turn to play the game
+//Inputs: 
+// again -> play again, true or false
+// rndPts -> points this round
+// strike -> strikes this round
+// score[] -> total scored points
+// round -> the round number
+// oTeam -> the computer's team name
+//Outputs:
+// again -> play again?
+// rndPts -> points this round
+// strike -> strikes this round
+// score[] -> total scored points 
+// oTeam -> the computer's team name
 void play(bool &again, unsigned short &rndPts, unsigned short &strike, int score[], short &round, string pTeam)
 {
-    round = i; //Add one to start the round
+    round++; //Add one to start the round
     char playing;
     while(again == true)
     {
@@ -292,6 +316,21 @@ void play(bool &again, unsigned short &rndPts, unsigned short &strike, int score
         }
     }
 }
+//*************************************oplay****************************************
+//Purpose: Have the computer opponent play
+//Inputs: 
+// again -> play again, true or false
+// rndPts -> points this round
+// strike -> strikes this round
+// score[] -> total scored points
+// round -> the round number
+// oTeam -> the computer's team name
+//Outputs:
+// again -> play again?
+// rndPts -> points this round
+// strike -> strikes this round
+// score[] -> total scored points 
+// oTeam -> the computer's team name
 void oplay(bool &again, unsigned short &rndPts, unsigned short &strike, int score[], short &round, string &oTeam)
 {
     again = true;
