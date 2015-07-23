@@ -10,12 +10,13 @@
 #include <ctime>
 #include <cstdlib>
 #include <string>
+#include <fstream>
 using namespace std;
 
 //Global Constants
 
 //Function Prototypes
-void header();
+void title();
 char grab();
 char roll(char);
 void clear();
@@ -29,21 +30,31 @@ int main(int argc, char** argv) {
     int seed = time(0);
     srand(seed);
     //Declare and Initialize variables
-    const int SIZE = 2;
-    int score[SIZE] = {};//Array to keep track of both you and your opponents score
+    const int SSIZE = 3;
+    int score[SSIZE] = {};//Array to keep track of both you and your opponents score
     unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
     string pTeam, oTeam; //Team Names
-    bool pTurn = true; //Is it the player's turn?
+    bool pTurn = true, again = true; //Is it the player's turn? / do you want to play again
     short round = 0; //The round number.  Not the Indiana Jones character.
-    int tRnd = 5; // Total rounds to be played
-    bool again = true; //Play again?
+    int tRnd = 3; // Total rounds to be played
+    float cash = 500.00f, bet = 0; // how much cash you have and how much you choose to bet
+    ifstream inputFile; // Input file stream object
+    inputFile.open("bank.txt");
+    inputFile >> cash;
     //Output Start Page
-    header();
+    title();
     //Get names of the teams
     cout << "Enter the name of your team:";
     cin >> pTeam;
     cout << "Enter the name of your opponents:";
     cin >> oTeam;
+    cout << "You have $" << cash << ", how much do you want to bet: ";
+    cin >> bet;
+    if (bet > cash)
+    {
+        cout << "You shouldn't gamble with more money than you have. Get help.";
+        exit(1);
+    }
     cin.ignore();
     //Start the game and loop for the number of rounds 
     for (int i = 1; i <= tRnd; i++)
@@ -66,15 +77,18 @@ int main(int argc, char** argv) {
     if (score[0] > score[1])
     {
         cout << pTeam << " Wins!";
+        cash += bet;
     }
     else if (score [1] > score [0])
     {
         cout << oTeam << " Wins...";
+        cash -= bet;
     }
     else
     {
         cout << "It's a draw.";
     }
+    inputFile.close();
     return 0;
 }
 
@@ -227,8 +241,8 @@ void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &p
         }
     }
 }
-//Purpose: Generate a header with information
-void header()
+//Purpose: Generate a title with information
+void title()
 {              
     cout << " . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..-----------. . . . . .\n"
          << ". . . . . $ . .$. .$$$$ . $ .$$$$$. $$$$$$. . . 8888. 8 .888. .8888 . . . |   $$$$$   |. . . . . \n"
