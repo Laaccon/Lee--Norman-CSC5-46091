@@ -30,17 +30,18 @@ int main(int argc, char** argv) {
     int seed = time(0);
     srand(seed);
     //Declare and Initialize variables
-    const int SSIZE = 3;
-    int score[SSIZE] = {};//Array to keep track of both you and your opponents score
+    const int SSIZE = 3, ROW = 2, COL = 3;
+    int totScor[SSIZE] = {};//Array to keep track of both you and your opponents score
+    int table[ROW][COL] = {};//table for score in each round.
     unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
     string pTeam, oTeam; //Team Names
     bool pTurn = true, again = true; //Is it the player's turn? / do you want to play again
     short round = 0; //The round number.  Not the Indiana Jones character.
     int tRnd = 3; // Total rounds to be played
     float cash = 500.00f, bet = 0; // how much cash you have and how much you choose to bet
-    ifstream inputFile; // Input file stream object
-    inputFile.open("bank.txt");
-    inputFile >> cash;
+    fstream dFile; // File that holds the amount of money you have
+    dFile.open("bank.txt");
+    dFile >> cash;
     //Output Start Page
     title();
     //Get names of the teams
@@ -52,7 +53,7 @@ int main(int argc, char** argv) {
     cin >> bet;
     if (bet > cash)
     {
-        cout << "You shouldn't gamble with more money than you have. Get help.";
+        cout << "You shouldn't gamble with more money than you have. Please get help.";
         exit(1);
     }
     cin.ignore();
@@ -61,6 +62,7 @@ int main(int argc, char** argv) {
     {
         //Initialize/Reset conditions for the start of the round
         again = true;
+        round++; //Add one to start the round
         //Start your turn
         pTurn = true;
         play(again, pTurn, rndPts, strike, score, round, pTeam);
@@ -69,26 +71,29 @@ int main(int argc, char** argv) {
         oplay(again, pTurn, rndPts, strike, score, round, oTeam);
         //End of round phase
         clear();
-        cout << "Round " << round << " is over. \n" << pTeam << " has " << score[0] << " points.\n" << oTeam << " has " << score[1] << " points.\n"; 
+        cout << "Round " << round << " is over. \n" << pTeam << " has " << totScor[0] << " points.\n" << oTeam << " has " << totScor[1] << " points.\n"; 
         cout << "Press enter to continue\n";
         cin.ignore();
     }
     //Determine who won
-    if (score[0] > score[1])
+    if (totScor[0] > totScor[1])
     {
         cout << pTeam << " Wins!";
         cash += bet;
+        cout << "You now have $" << cash << ".\n";
     }
     else if (score [1] > score [0])
     {
-        cout << oTeam << " Wins...";
+        cout << oTeam << " Wins... ";
         cash -= bet;
+        cout << "You now have $" << cash << ".\n";
     }
     else
     {
         cout << "It's a draw.";
     }
-    inputFile.close();
+    dFile << cash;
+    dFile.close();
     return 0;
 }
 
@@ -290,28 +295,27 @@ void clear()
 // again -> play again, true or false
 // rndPts -> points this round
 // strike -> strikes this round
-// score[] -> total scored points
+// totScor[] -> total scored points
 // round -> the round number
 // oTeam -> the computer's team name
 //Outputs:
 // again -> play again?
 // rndPts -> points this round
 // strike -> strikes this round
-// score[] -> total scored points 
+// totScor[] -> total scored points 
 // oTeam -> the computer's team name
-void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int score[], short &round, string pTeam)
+void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string pTeam)
 {
-    round++; //Add one to start the round
     while(again == true)
     {
         cout << "Round " << round << "<Your turn>" << endl;
         result(rndPts, strike, again, pTurn);
         if (again == false)
         {
-            score[0] += rndPts;
+            totScor[0] += rndPts;
             rndPts = 0;
             strike = 0;
-            cout << "Added point(s) to total. " << pTeam << " has " << score[0] << " total points.\n\n";
+            cout << "Added point(s) to total. " << pTeam << " has " << totScor[0] << " total points.\n\n";
         }
         if (strike >= 3)
         {
@@ -324,7 +328,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
         {
             if (again == true)
             {
-            cout << pTeam << " member <" << round << "> has " << rndPts << " points this round and " << strike << " strikes. " << pTeam << " has " << score[0] << " total points.\n\n";
+            cout << pTeam << " member <" << round << "> has " << rndPts << " points this round and " << strike << " strikes. " << pTeam << " has " << totScor[0] << " total points.\n\n";
             }
         }
         cout << "<Press Enter to continue>\n";
@@ -337,16 +341,16 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
 // again -> play again, true or false
 // rndPts -> points this round
 // strike -> strikes this round
-// score[] -> total scored points
+// totScor[] -> total scored points
 // round -> the round number
 // oTeam -> the computer's team name
 //Outputs:
 // again -> play again?
 // rndPts -> points this round
 // strike -> strikes this round
-// score[] -> total scored points 
+// totScor[] -> total scored points 
 // oTeam -> the computer's team name
-void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int score[], short &round, string oTeam)
+void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string oTeam)
 {
     again = true;
     while (again == true)
@@ -359,10 +363,10 @@ void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &str
         if (strike >= 2)
         {
             //Add round points to total score and reinitialize
-            score[1] += rndPts;
+            totScor[1] += rndPts;
             rndPts = 0;
             strike = 0;
-            cout << "Added point(s) to total. " << score[1] << " total points for "<< oTeam <<" .\n";
+            cout << oTeam << " chooses to stop. \n" << "Adding point(s) to total. " << totScor[1] << " total points for "<< oTeam <<".\n";
             again = false;
             cout << "<Press enter to continue>\n";
             cin.ignore();
