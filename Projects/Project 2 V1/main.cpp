@@ -39,24 +39,25 @@ int main(int argc, char** argv) {
     short round = 0; //The round number.  Not the Indiana Jones character.
     int tRnd = 3; // Total rounds to be played
     float cash = 500.00f, bet = 0; // how much cash you have and how much you choose to bet
-    fstream dFile; // File that holds the amount of money you have
-    dFile.open("bank.txt");
-    dFile >> cash;
+    ifstream inFile; // File that holds the amount of money you have
+    inFile.open("bank.txt");
+    inFile >> cash;
+    inFile.close();
     //Output Start Page
     title();
     //Get names of the teams
     cout << "Enter the name of your team:";
-    cin >> pTeam;
+    getline(cin, pTeam);
     cout << "Enter the name of your opponents:";
-    cin >> oTeam;
+    getline(cin, oTeam);
     cout << "You have $" << cash << ", how much do you want to bet: ";
     cin >> bet;
+    cin.ignore();
     if (bet > cash)
     {
         cout << "You shouldn't gamble with more money than you have. Please get help.";
         exit(1);
     }
-    cin.ignore();
     //Start the game and loop for the number of rounds 
     for (int i = 1; i <= tRnd; i++)
     {
@@ -65,10 +66,10 @@ int main(int argc, char** argv) {
         round++; //Add one to start the round
         //Start your turn
         pTurn = true;
-        play(again, pTurn, rndPts, strike, score, round, pTeam);
+        play(again, pTurn, rndPts, strike, totScor, round, pTeam);
         //Start opponent's turn
         pTurn = false;
-        oplay(again, pTurn, rndPts, strike, score, round, oTeam);
+        oplay(again, pTurn, rndPts, strike, totScor, round, oTeam);
         //End of round phase
         clear();
         cout << "Round " << round << " is over. \n" << pTeam << " has " << totScor[0] << " points.\n" << oTeam << " has " << totScor[1] << " points.\n"; 
@@ -82,7 +83,7 @@ int main(int argc, char** argv) {
         cash += bet;
         cout << "You now have $" << cash << ".\n";
     }
-    else if (score [1] > score [0])
+    else if (totScor[1] > totScor[0])
     {
         cout << oTeam << " Wins... ";
         cash -= bet;
@@ -92,6 +93,8 @@ int main(int argc, char** argv) {
     {
         cout << "It's a draw.";
     }
+    ofstream dFile;
+    dFile.open("bank.txt");
     dFile << cash;
     dFile.close();
     return 0;
