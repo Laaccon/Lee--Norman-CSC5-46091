@@ -14,15 +14,17 @@
 using namespace std;
 
 //Global Constants
-const int ROW = 3;
-const int COL =3;
+const int PLYR = 2;
+const int RND = 3;
+
 //Function Prototypes
 void title();
 char grab();
+void scrBrd(int[][RND], int);
 char roll(char);
 void clear();
-void play(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][COL], int);
-void oplay(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][COL], int);
+void play(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][RND], int);
+void oplay(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][RND], int);
 void result(unsigned short &, unsigned short &, bool &, bool &);
 
 //Execution begins here
@@ -33,7 +35,7 @@ int main(int argc, char** argv) {
     //Declare and Initialize variables
     const int SSIZE = 3;
     int totScor[SSIZE] = {};//Array to keep track of both you and your opponents score
-    int table[ROW][COL] = {};//table for score in each round.
+    int table[PLYR][RND] = {};//table for score in each round.
     unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
     string pTeam, oTeam; //Team Names
     bool pTurn = true, again = true; //Is it the player's turn? / do you want to play again
@@ -67,12 +69,13 @@ int main(int argc, char** argv) {
         round++; //Add one to start the round
         //Start your turn
         pTurn = true;
-        play(again, pTurn, rndPts, strike, totScor, round, pTeam, table, ROW);
+        play(again, pTurn, rndPts, strike, totScor, round, pTeam, table, PLYR);
         //Start opponent's turn
         pTurn = false;
-        oplay(again, pTurn, rndPts, strike, totScor, round, oTeam, table, ROW);
+        oplay(again, pTurn, rndPts, strike, totScor, round, oTeam, table, PLYR);
         //End of round phase
         clear();
+        scrBrd(table, PLYR);
         cout << "Round " << round << " is over. \n" << pTeam << " has " << totScor[0] << " points.\n" << oTeam << " has " << totScor[1] << " points.\n"; 
         cout << "Press enter to continue\n";
         cin.ignore();
@@ -308,7 +311,7 @@ void clear()
 // strike -> strikes this round
 // totScor[] -> total scored points 
 // oTeam -> the computer's team name
-void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string pTeam, int table[][COL], int ROW)
+void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string pTeam, int table[][RND], int PLYR)
 {
     while(again == true)
     {
@@ -355,7 +358,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
 // strike -> strikes this round
 // totScor[] -> total scored points 
 // oTeam -> the computer's team name
-void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string oTeam, int table[][COL], int ROW)
+void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string oTeam, int table[][RND], int PLYR)
 {
     again = true;
     while (again == true)
@@ -377,5 +380,18 @@ void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &str
             cout << "<Press enter to continue>\n";
             cin.ignore();
         }
+    }
+}
+
+void scrBrd (int table[][RND], int PLYR)
+{
+    cout << "Scoreboard:";
+    for(int p = 0; p < PLYR; p++)
+    {
+        for(int r = 0; r < RND; r++)
+        {
+            cout << table[p][r] << " ";
+        }
+        cout << endl;
     }
 }
