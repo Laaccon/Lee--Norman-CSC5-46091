@@ -24,9 +24,9 @@ char grab();
 void scrBrd(int[][RND], int);
 char roll(char);
 void clear();
-int sumttl();
-void play(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][RND], int);
-void oplay(bool &, bool &, unsigned short &, unsigned short &, int [], short &, string, int[][RND], int);
+int sumTtl();
+void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string, int[][RND], int);
+void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string, int[][RND], int);
 void result(unsigned short &, unsigned short &, bool &, bool &);
 
 //Structures
@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
     srand(seed);
     
     //Declare and Initialize variables
-    const int SSIZE = 3;
-    int totScor[SSIZE] = {};//Array to keep track of both you and your opponents score
+    const int SSIZE = 2;
+    int *totPtr = new int [SSIZE];//Array to keep track of both you and your opponents score
     int table[PLYR][RND] = {};//table for score in each round.
     unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
     string pTeam, oTeam; //Team Names
@@ -86,14 +86,14 @@ int main(int argc, char** argv) {
         round++; //Add one to start the round
         //Start your turn
         pTurn = true;
-        play(again, pTurn, rndPts, strike, totScor, round, pTeam, table, PLYR);
+        play(again, pTurn, rndPts, strike, totPtr, round, pTeam, table, PLYR);
         //Start opponent's turn
         pTurn = false;
-        oplay(again, pTurn, rndPts, strike, totScor, round, oTeam, table, PLYR);
+        oplay(again, pTurn, rndPts, strike, totPtr, round, oTeam, table, PLYR);
         //End of round phase
         clear();
         scrBrd(table, PLYR);
-        cout << "Round " << round << " is over. \n" << pTeam << " has " << totScor[0] << " points.\n" << oTeam << " has " << totScor[1] << " points.\n"; 
+        cout << "Round " << round << " is over. \n" << pTeam << " has " << totPtr[0] << " points.\n" << oTeam << " has " << totPtr[1] << " points.\n"; 
         cout << "Press enter to continue\n";
         cin.ignore();
     }
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
         table[0][0],
         table[0][1],
         table[0][2],
-        totScor[0]
+        totPtr[0]
     };
     cout << setw(16) << left << "Player:" << right << setw(9) << "Round 1" << setw(10) << "Round 2"
             << setw(10) << "Round 3"  << setw(12) << "Total\n";
@@ -118,18 +118,18 @@ int main(int argc, char** argv) {
         table[1][0],
         table[1][1],
         table[1][2],
-        totScor[1]
+        totPtr[1]
     };
     cout << setw(15) << left << comp.name << right << setw(10) << comp.rnd1 << setw(10) << comp.rnd2 
         << setw(10) << comp.rnd3 << setw(10) << comp.ttl << endl;
     //Determine who won
-    if (totScor[0] > totScor[1])
+    if (totPtr[0] > totPtr[1])
     {
         cout << pTeam << " Wins!";
         cash += bet;
         cout << "You now have $" << cash << ".\n";
     }
-    else if (totScor[1] > totScor[0])
+    else if (totPtr[1] > totPtr[0])
     {
         cout << oTeam << " Wins... ";
         cash -= bet;
@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
     outFile.open("bank.txt");
     outFile << cash;
     outFile.close();
+    delete [] totPtr;
     return 0;
 }
 
@@ -157,20 +158,21 @@ char grab()
     val = rand()% 10 + 1;
     //determine color of dice grabbed
     if (val <= 5) //50% chance for green
-    {
-        color = 'g';
-        cout << "A Green Dice has been pulled out of the bag.\n";
-    }
+        {
+            color = 'g';
+            cout << "A Green Dice has been pulled out of the bag.\n";
+        }
     else if (val >= 9) //20% chance for red
-    {
-        color = 'r';
-        cout << "A Red Dice has been pulled out of the bag.\n";
-    }
+        {
+            color = 'r';
+            cout << "A Red Dice has been pulled out of the bag.\n";
+        }
     else
-    {
-        color = 'y';//30% chance for yellow
-        cout << "A Yellow Dice has been pulled out of the bag.\n";
-    }
+        {
+            color = 'y';//30% chance for yellow
+            cout << "A Yellow Dice has been pulled out of the bag.\n";
+        }
+    
     return (color);	
 }
 
@@ -345,17 +347,17 @@ void clear()
 // again -> play again, true or false
 // rndPts -> points this round
 // strike -> strikes this round
-// totScor[] -> total scored points
+// totPtr[] -> total scored points
 // round -> the round number
 // oTeam -> the computer's team name
 //Outputs:
 // again -> play again?
 // rndPts -> points this round
 // strike -> strikes this round
-// totScor[] -> total scored points 
+// totPtr[] -> total scored points 
 // oTeam -> the computer's team name
 //*************************************************************************
-void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string pTeam, int table[][RND], int PLYR)
+void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int *totPtr, short &round, string pTeam, int table[][RND], int PLYR)
 {
     while(again == true)
     {
@@ -363,11 +365,11 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
         result(rndPts, strike, again, pTurn);
         if (again == false)
         {
-            totScor[0] += rndPts;
+            totPtr += rndPts;
             table[0][(round-1)] += rndPts;
             rndPts = 0;
             strike = 0;
-            cout << "Added point(s) to total. " << pTeam << " has " << totScor[0] << " total points.\n\n";
+            cout << "Added point(s) to total. " << pTeam << " has " << totPtr << " total points.\n\n";
         }
         if (strike >= 3)
         {
@@ -380,7 +382,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
         {
             if (again == true)
             {
-            cout << pTeam << " member <" << round << "> has " << rndPts << " points this round and " << strike << " strikes. " << pTeam << " has " << totScor[0] << " total points.\n\n";
+            cout << pTeam << " member <" << round << "> has " << rndPts << " points this round and " << strike << " strikes. " << pTeam << " has " << totPtr[0] << " total points.\n\n";
             }
         }
         cout << "<Press Enter to continue>\n";
@@ -393,17 +395,17 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
 // again -> play again, true or false
 // rndPts -> points this round
 // strike -> strikes this round
-// totScor[] -> total scored points
+// totPtr[] -> total scored points
 // round -> the round number
 // oTeam -> the computer's team name
 //Outputs:
 // again -> play again?
 // rndPts -> points this round
 // strike -> strikes this round
-// totScor[] -> total scored points 
+// totPtr[] -> total scored points 
 // oTeam -> the computer's team name
 //**********************************************************************************
-void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int totScor[], short &round, string oTeam, int table[][RND], int PLYR)
+void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int *totPtr, short &round, string oTeam, int table[][RND], int PLYR)
 {
     again = true;
     while (again == true)
@@ -416,11 +418,11 @@ void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &str
         if (strike >= 2)
         {
             //Add round points to total score and reinitialize
-            totScor[1] += rndPts;
+            totPtr[1] += rndPts;
             table[1][(round-1)] += rndPts;
             rndPts = 0;
             strike = 0;
-            cout << oTeam << " chooses to stop. \n" << "Adding point(s) to total. " << totScor[1] << " total points for "<< oTeam <<".\n";
+            cout << oTeam << " chooses to stop. \n" << "Adding point(s) to total. " << totPtr[1] << " total points for "<< oTeam <<".\n";
             again = false;
             cout << "<Press enter to continue>\n";
             cin.ignore();
@@ -446,4 +448,9 @@ void scrBrd (int table[][RND], int PLYR)
         }
         cout << endl;
     }
+}
+
+int sumTtl()
+{
+    
 }
