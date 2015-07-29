@@ -14,23 +14,7 @@
 #include <iomanip>
 using namespace std;
 
-//Global Constants
-const int PLYR = 2;
-const int RND = 3;
-
-//Function Prototypes
-void title();
-char grab();
-void scrBrd(int[][RND], int);
-char roll(char);
-void clear();
-int srchHi(int [][RND], int);
-int sumTtl();
-void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
-void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
-void result(unsigned short &, unsigned short &, bool &, bool &);
-
-//Structures
+//User Libraries
 struct FnlTbl
 {
     string name;
@@ -40,6 +24,26 @@ struct FnlTbl
     int ttl;
 };
 
+//Global Constants
+const int PLYR = 2;
+const int RND = 3;
+
+//Function Prototypes
+void menu();
+void disHscr(int [], int);
+void rdHscr(int [], int);
+void wtHscr(int [], int);
+void title();
+char grab();
+void scrBrd(const int[][RND], int);
+char roll(char);
+void clr();
+int srchHi(int [][RND], int);
+int sumTtl();
+void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
+void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
+void result(unsigned short &, unsigned short &, bool &, bool &);
+
 //Execution begins here
 int main(int argc, char** argv) {
     
@@ -48,32 +52,58 @@ int main(int argc, char** argv) {
     srand(seed);
     
     //Declare and Initialize variables
-    const int SSIZE = 2, NMSIZE = 15;
-    int *totPtr = new int [SSIZE];//Array to keep track of both you and your opponents score
+    const int SSIZE = 5, NMSIZE = 15, HISIZE = 10;
+    int *totPtr = new int [SSIZE]();//Array to keep track of both you and your opponents score
     int table[PLYR][RND] = {};//table for score in each round.
+    int hScr[HISIZE]; // High scores
     unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
-    char pTeam[NMSIZE], oTeam[NMSIZE]; //Team Names
-    string tmName[SSIZE] = {};
-    bool pTurn = true, again = true; //Is it the player's turn? / do you want to play again
+    char select = 0; //selected choice for menu
+    int places = 0; // counter to find what place you got
+    string tmName[SSIZE] = {};//array to hold team names
+    bool pTurn = true, again = true, swap = false; //Is it the player's turn? / do you want to play again
     short round = 0; //The round number.  Not the Indiana Jones character.
     int tRnd = 3; // Total rounds to be played5
     float cash = 500.00f, bet = 0.0f; // how much cash you have and how much you choose to bet
     
     //Open file
-    ifstream inFile; // File that holds the amount of money you have
-    inFile.open("bank.txt");
-    inFile >> cash;
-    inFile.close();
+    ifstream infile; // File that holds the amount of money you have
+    infile.open("bank.txt");
+    infile >> cash;
+    infile.close();
+    rdHscr(hScr, HISIZE); // get the high scores from the file
     
     //Output Start Page
     title();
+    clr();
+    do{
+        menu();
+        cin >> select;
+        cin.ignore();
+        switch(select){
+            case 'T': 
+            {
+                clr();
+                title();
+                break;
+            }
+            case 'Q': 
+            {
+                exit(1);
+            }
+            case 'H': 
+            {
+                clr();
+                disHscr(hScr, HISIZE);
+                break;
+            }
+            default: clr();               
+        };
+    }while(select != 'P');
     //Get names of the teams
     cout << "Enter the name of your team:";
     getline(cin, tmName[0]);
-    //pTeam[NMSIZE] = tmName[0];
     cout << "Enter the name of your opponents:";
     getline(cin, tmName[1]);
-    //oTeam[NMSIZE] = tmName[1];
     cout << "You have $" << cash << ", how much do you want to bet: ";
     cin >> bet;
     cin.ignore();
@@ -95,13 +125,13 @@ int main(int argc, char** argv) {
         pTurn = false;
         oplay(again, pTurn, rndPts, strike, totPtr, round, tmName, table, PLYR);
         //End of round phase
-        clear();
+        clr();
         scrBrd(table, PLYR);
         cout << "Round " << round << " is over. \n" << tmName[0] << " has " << *totPtr << " points.\n" << tmName[1] << " has " << *(totPtr + 1) << " points.\n"; 
         cout << "Press enter to continue\n";
         cin.ignore();
     }
-    clear();
+    clr();
     //Structure used to make the table for the final report
     FnlTbl report[SSIZE];
     for(int i = 0; i < SSIZE; i++)
@@ -114,7 +144,7 @@ int main(int argc, char** argv) {
     }
     cout << setw(16) << left << "Player:" << right << setw(9) << "Round 1" << setw(10) << "Round 2"
             << setw(10) << "Round 3"  << setw(12) << "Total\n";
-    cout << "--------------------------------------------------------------------\n";
+    cout << "-----------------------------------------------------------" << endl;
     cout << setw(15) << left << report[0].name << right << setw(10) << report[0].rnd1 << setw(10) << report[0].rnd2 
             << setw(10) << report[0].rnd3 << setw(10) << report[0].ttl << endl;
     cout << setw(15) << left << report[1].name << right << setw(10) << report[1].rnd1 << setw(10) << report[1].rnd2 
@@ -138,12 +168,45 @@ int main(int argc, char** argv) {
     {
         cout << "It's a draw. ";
     }
-    //Open file to edit the new amount of money
-    ofstream outFile;
-    outFile.open("bank.txt");
-    outFile << cash;
-    outFile.close();
+    //High Score Section
+    cout << "Press Enter to continue: ";
+    cin.ignore();
+    if (totPtr[0] >= hScr[0])//if your score was higher that the lowest score on the list
+    {
+        hScr[0] = totPtr[0]; //Replace the lowest score with your score
+        //Bubble Sort
+        do
+        {
+            swap = false;
+            for(int i = 0; i < (HISIZE -1); i++)
+            {
+                if (hScr[i] > hScr[i + 1])
+                {
+                    hScr[i] = hScr[i]^hScr[i + 1];
+                    hScr[i + 1] = hScr[i]^hScr[i + 1];
+                    hScr[i] = hScr[i]^hScr[i + 1];
+                    swap = true;
+                    places++;
+                }
+            }
+        } while(swap);
+        //Output what place you got
+        disHscr(hScr, HISIZE);
+        wtHscr(hScr, HISIZE); //Write the new high score list to file
+        cout << "You are number " << 10 - places << " on the high score list.";
+    }
+    else
+    {
+        disHscr(hScr, HISIZE);
+        cout << "You missed making it onto the top ten scores by " << hScr[0] - totPtr[0] << endl;
+    }
+    //Output the cash back into the file
+    ofstream outfile;
+    outfile.open("bank.txt");
+    outfile << cash;
+    outfile.close();
     delete [] totPtr;
+    totPtr = NULL;
     return 0;
 }
 
@@ -243,13 +306,16 @@ char roll(char dice)
 //	strike
 void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &pTurn)
 {
-    char rslt, color, rolling; // copied values for color and the value you get from rolling
+    char rslt = 0, color = 0, rolling = 0; // copied values for color and the value you get from rolling
     color = grab(); //grab a dice from the bag and find out which color you got	//Check if user wants to roll
     if (pTurn == true)
     {
-    cout << "Do you wish to roll the dice?(y/n)";
-        cin >> rolling;
-        cin.ignore();
+        do
+        {
+            cout << "Do you wish to roll the dice?(y/n)";
+            cin >> rolling;
+        }while(rolling != 'y' && rolling != 'n' );
+        
         if (rolling == 'n')
         {
             again = false;
@@ -258,7 +324,7 @@ void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &p
     if (pTurn == false || rolling == 'y')
     {
         rslt = roll(color); //roll the dice and get the value
-        clear();
+        clr();
         //Output  representation of the dice and increment strikes or points based on roll result  
         if (rslt == 'L')
         {
@@ -301,11 +367,11 @@ void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &p
 void title()
 {              
     cout << " . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ..-----------. . . . . .\n"
-         << ". . . . . $ . .$. .$$$$ . $ .$$$$$. $$$$$$. . . 8888. 8 .888. .8888 . . . |   $$$$$   |. . . . . \n"
-         << " . . . . .$. . $ . $ . . .$.$  . .$. .$. . . . .8. .8.8.8. .8. 8 . . . . .|    $ $    | . . . . .\n"
-         << ". . . . . $$$$$$. .$$$. . $ .$$$$ . . $ . . . . 8 . 8 8 8 . . .888. . . . |  $     $  |. . . . . \n"
-         << " . . . . .$. . $ . $ . . .$.$. . $$. .$. . . . .8. .8.8.8. .8. 8 . . . . .| $       $ | . . . . .\n"
-         << ". . . . . $ . .$. .$$$$ . $ .$$$$$. . $ . . . . 8888. 8 .888. .8888 . . . |  $$$$$$$  |. . . . . \n"
+         << ". . . . . $ . .$. .$$$$ . $ .$$$$$$ $$$$$$. . . 8888. 8 .888. .8888 . . . |   $$$$$   |. . . . . \n"
+         << " . . . . .$. . $ . $ . . .$.$$ . . . .$. . . . .8. .8.8.8. .8. 8 . . . . .|    $ $    | . . . . .\n"
+         << ". . . . . $$$$$$. .$$$. . $ .$$$$$. . $ . . . . 8 . 8 8 8 . . .888. . . . |  $     $  |. . . . . \n"
+         << " . . . . .$. . $ . $ . . .$. . . $$. .$. . . . .8. .8.8.8. .8. 8 . . . . .| $       $ | . . . . .\n"
+         << ". . . . . $ . .$. .$$$$ . $ $$$$$$. . $ . . . . 8888. 8 .888. .8888 . . . |  $$$$$$$  |. . . . . \n"
          << " . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .'-----------' . . . . .\n"
          << "How to play Heist Dice: Every round you get to roll the dice.\n\n"
          << "There are 3 different outcomes you get from rolling: A loot bag, shoes, and a strike.\n"
@@ -331,9 +397,21 @@ void title()
     cout << "<Press Enter to continue>\n";
     cin.ignore();
 }
-          
+
+void menu()
+{
+    cout<<"------------Menu-------------"<<endl;
+    cout<<"|      Press:               |"<<endl;
+    cout<<"|                           |"<<endl;
+    cout<<"|      (P)lay the game      |"<<endl;
+    cout<<"|      (T)itle Screen       |"<<endl;
+    cout<<"|      (H)igh Scores        |"<<endl;
+    cout<<"|      (Q)uit               |"<<endl;
+    cout<<"----------------------------|"<<endl;
+}
+
 //Purpose: uses 40 new lines to clear the screen
-void clear()
+void clr()
 {
     for(int i = 1; i <=40; i++)
     {
@@ -376,6 +454,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
             rndPts = 0;
             again = false;
             strike = 0;
+            cin.ignore();
         }
         else
         {
@@ -436,7 +515,7 @@ void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &str
 //Outputs:
 //  table[PLYR][RND] -> a table with the score for each round so far
 //*******************************************************************
-void scrBrd (int table[][RND], int PLYR)
+void scrBrd (const int table[][RND], int PLYR)
 {
     cout << "Scoreboard:\n";
     for(int p = 0; p < PLYR; p++)
@@ -463,4 +542,36 @@ int srchHi(int table[][RND], int PLYR)
         }
     }
     return high;
+}
+void disHscr(int hScr[], int HISIZE)
+{
+    cout << "  --High Scores--\n";
+    for(int i = HISIZE -1, c = 1; i >= 0; i--, c++)
+    {
+        cout << "#" << setw(2) << c << "." << setw(15)<< hScr[i] << endl;
+    }
+    cout << "---------------\n";
+}
+
+void rdHscr(int hScr[], int HISIZE)
+{
+    ifstream file;
+    file.open("High_Scores.txt");
+    file.clear();
+    for(int i = 0; i < HISIZE; i++)
+    {
+        file >> hScr[i];
+    }
+    file.close();
+}
+
+void wtHscr(int hScr[], int HISIZE)
+{
+    ofstream file;
+    file.open("High_Scores.txt");
+    for(int i = 0; i < HISIZE; i++)
+    {
+        file << hScr[i] << " ";
+    }
+    file.close();
 }
