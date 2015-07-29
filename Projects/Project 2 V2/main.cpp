@@ -30,18 +30,18 @@ const int RND = 3;
 
 //Function Prototypes
 void menu();
+void title();
+void clr();
+char grab();
+char roll(char);
+void result(unsigned short &, unsigned short &, bool &, bool &);
+void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
+void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
+void scrBrd(const int[][RND], int);
+int srchHi(int [][RND], int);
 void disHscr(int [], int);
 void rdHscr(int [], int);
 void wtHscr(int [], int);
-void title();
-char grab();
-void scrBrd(const int[][RND], int);
-char roll(char);
-void clr();
-int srchHi(int [][RND], int);
-void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
-void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
-void result(unsigned short &, unsigned short &, bool &, bool &);
 
 //Execution begins here
 int main(int argc, char** argv) {
@@ -77,6 +77,10 @@ int main(int argc, char** argv) {
     do{
         menu();
         cin >> select;
+        if (islower(select)); 
+        {
+            select = toupper(select);
+        }
         cin.ignore();
         switch(select){
             case 'T': 
@@ -109,9 +113,9 @@ int main(int argc, char** argv) {
     cout << "You have $" << cash << ", how much do you want to bet: ";
     cin >> bet;
     cin.ignore();
-    if (bet > cash) //Please gamble responsibly
+    if (bet > cash)                                  //Please gamble responsibly
     {
-        cout << "You shouldn't gamble with more money than you have. Please get help.";
+        cout << "You shouldn't gamble more money than you have. Please get help.";
         exit(1);
     }
     
@@ -120,7 +124,7 @@ int main(int argc, char** argv) {
     {
         //Initialize/Reset conditions for the start of the round
         again = true;
-        round++; //Add one to start the round
+        round++;                                     //Add one to start the round
         //Start your turn
         pTurn = true;
         play(again, pTurn, rndPts, strike, totPtr, round, tmName, table, PLYR);
@@ -178,9 +182,9 @@ int main(int argc, char** argv) {
     //High Score Section
     cout << "Press Enter to continue: ";
     cin.ignore();
-    if (totPtr[0] >= hScr[0])//if your score was higher that the lowest score on the list
+    if (totPtr[0] >= hScr[0])                       //if your score was higher that the lowest score on the list
     {
-        hScr[0] = totPtr[0]; //Replace the lowest score with your score
+        hScr[0] = totPtr[0];                        //Replace the lowest score with your score
         //Bubble Sort
         do
         {
@@ -199,7 +203,7 @@ int main(int argc, char** argv) {
         } while(swap);
         //Output what place you got
         disHscr(hScr, HISIZE);
-        wtHscr(hScr, HISIZE); //Write the new high score list to file
+        wtHscr(hScr, HISIZE);                       //Write the new high score list to file
         cout << "You are number " << HISIZE - places << " on the high score list.";
     }
     else
@@ -210,6 +214,7 @@ int main(int argc, char** argv) {
     //Output the cash back into the file
     ofstream outfile;
     outfile.open("bank.txt");
+    outfile << fixed << setprecision(2);
     outfile << cash;
     outfile.close();
     delete [] totPtr;
@@ -226,19 +231,19 @@ char grab()
     short val;
     val = rand()% 10 + 1;
     //determine color of dice grabbed
-    if (val <= 5) //50% chance for green
+    if (val <= 5)                                   //50% chance for green
         {
             color = 'g';
             cout << "A Green Dice has been pulled out of the bag.\n";
         }
-    else if (val >= 9) //20% chance for red
+    else if (val >= 9)                              //20% chance for red
         {
             color = 'r';
             cout << "A Red Dice has been pulled out of the bag.\n";
         }
     else
         {
-            color = 'y';//30% chance for yellow
+            color = 'y';                            //30% chance for yellow
             cout << "A Yellow Dice has been pulled out of the bag.\n";
         }
     
@@ -255,49 +260,49 @@ char roll(char dice)
 {
     char val, rslt;
     val = rand()%6 + 1;
-    if (dice == 'r') //Red dice, weighted with 50% chance of a strike
+    if (dice == 'r')                                //Red dice, weighted with 50% chance of a strike
     {
-        if (val <= 3) //%50 chance of a strike
+        if (val <= 3)                               //%50 chance of a strike
         {
-            rslt = 'X'; //you got caught/a strike
+            rslt = 'X';                             //you got caught/a strike
         }
-        else if (val == 6) //1/6 chance for a point
+        else if (val == 6)                          //1/6 chance for a point
         {
-            rslt = 'L'; //you got loot/a point
+            rslt = 'L';                             //you got loot/a point
         }
-        else //1/3 chance to get away
+        else                                        //1/3 chance to get away
         {
-            rslt = 'F'; //you failed to get loot but got away
+            rslt = 'F';                             //you failed to get loot but got away
         }
     }
-    else if (dice == 'g') //Green dice, weighted with a 50% chance to get you Loot
+    else if (dice == 'g')                           //Green dice, weighted with a 50% chance to get you Loot
     {
-        if (val == 1)//1/6 chance of a strike
+        if (val == 1)                               //1/6 chance of a strike
         {
-            rslt = 'X'; //you got caught/a strike
+            rslt = 'X';                             //you got caught/a strike
         }
-        else if (val >= 4)//1/2 chance of a point
+        else if (val >= 4)                          //1/2 chance of a point
         {
-            rslt = 'L'; //you got loot/a point
+            rslt = 'L';                             //you got loot/a point
         }
-        else//1/3 chance of getting 
+        else                                        //1/3 chance of getting 
         {
-            rslt = 'F'; //you failed to get loot but got away
+            rslt = 'F';                             //you failed to get loot but got away
         }
     }
-    else if (dice == 'y') //Yellow dice, weighted with even odds for all outcomes
+    else if (dice == 'y')                           //Yellow dice, weighted with even odds for all outcomes
     {
         if (val <= 2)
         {
-            rslt = 'X'; //you got caught/a strike
+            rslt = 'X';                             //you got caught/a strike
         }
         else if (val >= 5)
         {
-            rslt = 'L'; //you got loot/a point
+            rslt = 'L';                             //you got loot/a point
         }
         else
         {
-            rslt = 'F'; //you failed to get loot but got away
+            rslt = 'F';                             //you failed to get loot but got away
         }
     }
     return (rslt);
@@ -316,14 +321,18 @@ char roll(char dice)
 //*******************************************************************
 void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &pTurn)
 {
-    char rslt = 0, color = 0, rolling = 0; // copied values for color and the value you get from rolling
-    color = grab(); //grab a dice from the bag and find out which color you got	//Check if user wants to roll
+    char rslt = 0, color = 0, rolling = 0;          // copied values for color and the value you get from rolling
+    color = grab();                                 //grab a dice from the bag and find out which color you got	//Check if user wants to roll
     if (pTurn == true)
     {
         do
         {
             cout << "Do you wish to roll the dice?(y/n)";
             cin >> rolling;
+            if (isupper(rolling)); 
+            {
+                rolling = tolower(rolling);
+            }
         }while(rolling != 'y' && rolling != 'n' );
         
         if (rolling == 'n')
@@ -334,7 +343,7 @@ void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &p
     }
     if (pTurn == false || rolling == 'y')
     {
-        rslt = roll(color); //roll the dice and get the value
+        rslt = roll(color);                         //roll the dice and get the value
         clr();
         //Output  representation of the dice and increment strikes or points based on roll result  
         if (rslt == 'L')
@@ -452,7 +461,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
     {
         cout << "Round " << round << "<Your turn>" << endl;
         result(rndPts, strike, again, pTurn);
-        if (again == false)
+        if (again == false)                         //When you stop rolling your points get added to your total
         {
             *totPtr += rndPts;
             table[0][(round-1)] += rndPts;
@@ -460,7 +469,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
             strike = 0;
             cout << "Added point(s) to total. " << tmName[0] << " has " << *totPtr << " total points.\n\n";
         }
-        if (strike >= 3)
+        if (strike >= 3)                            //If you get 3 strike lose all points
         {
             cout << tmName[0] << " member <" << round <<"> has 3 strikes. Facing life in prison, you give up all your loot for a plea deal.\n\n";
             rndPts = 0;
@@ -573,6 +582,7 @@ void rdHscr(int hScr[], int HISIZE)
     ifstream file;
     file.open("High_Scores.txt");
     file.clear();
+    //Loop add the data from the file to the array
     for(int i = 0; i < HISIZE; i++)
     {
         file >> hScr[i];
@@ -585,6 +595,7 @@ void wtHscr(int hScr[], int HISIZE)
 {
     ofstream file;
     file.open("High_Scores.txt");
+    //Loop output the array to the file
     for(int i = 0; i < HISIZE; i++)
     {
         file << hScr[i] << " ";
