@@ -39,7 +39,6 @@ void scrBrd(const int[][RND], int);
 char roll(char);
 void clr();
 int srchHi(int [][RND], int);
-int sumTtl();
 void play(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
 void oplay(bool &, bool &, unsigned short &, unsigned short &, int *, short &, string [], int[][RND], int);
 void result(unsigned short &, unsigned short &, bool &, bool &);
@@ -52,25 +51,25 @@ int main(int argc, char** argv) {
     srand(seed);
     
     //Declare and Initialize variables
-    const int SSIZE = 5, NMSIZE = 15, HISIZE = 10;
-    int *totPtr = new int [SSIZE]();//Array to keep track of both you and your opponents score
-    int table[PLYR][RND] = {};//table for score in each round.
-    int hScr[HISIZE]; // High scores
-    unsigned short rndPts = 0, strike = 0; //points and strikes accrued this round
-    char select = 0; //selected choice for menu
-    int places = 0; // counter to find what place you got
-    string tmName[SSIZE] = {};//array to hold team names
-    bool pTurn = true, again = true, swap = false; //Is it the player's turn? / do you want to play again
-    short round = 0; //The round number.  Not the Indiana Jones character.
-    int tRnd = 3; // Total rounds to be played5
-    float cash = 500.00f, bet = 0.0f; // how much cash you have and how much you choose to bet
+    const int SSIZE = 5, HISIZE = 10;                //number of total score slots, number of high scores
+    int *totPtr = new int [SSIZE]();                 //Array to keep track of both you and your opponents score
+    int table[PLYR][RND] = {};                       //table for score in each round.
+    int hScr[HISIZE];                                //High scores
+    unsigned short rndPts = 0, strike = 0;           //points and strikes accrued this round
+    char select = 0;                                 //selected choice for menu
+    int places = 0;                                  //counter to find what place you got
+    string tmName[SSIZE] = {};                       //array to hold team names
+    bool pTurn = true, again = true, swap = false;   //Is it the player's turn? / do you want to play again
+    short round = 0;                                 //The round number.  Not the Indiana Jones character.
+    int tRnd = 3;                                    // Total rounds to be played
+    float cash = 500.00f, bet = 0.0f;                // how much cash you have and how much you choose to bet
     
     //Open file
-    ifstream infile; // File that holds the amount of money you have
+    ifstream infile;                                 // File that holds the amount of money you have
     infile.open("bank.txt");
     infile >> cash;
     infile.close();
-    rdHscr(hScr, HISIZE); // get the high scores from the file
+    rdHscr(hScr, HISIZE);                            // get the high scores from the file
     
     //Output Start Page
     title();
@@ -99,19 +98,23 @@ int main(int argc, char** argv) {
             default: clr();               
         };
     }while(select != 'P');
+    
     //Get names of the teams
     cout << "Enter the name of your team:";
     getline(cin, tmName[0]);
-    cout << "Enter the name of your opponents:";
+    cout << "Enter the name of your opponent's team:";
     getline(cin, tmName[1]);
+    
+    //Prompt for a bet
     cout << "You have $" << cash << ", how much do you want to bet: ";
     cin >> bet;
     cin.ignore();
-    if (bet > cash)
+    if (bet > cash) //Please gamble responsibly
     {
         cout << "You shouldn't gamble with more money than you have. Please get help.";
         exit(1);
     }
+    
     //Start the game and loop for the number of rounds 
     for (int i = 1; i <= tRnd; i++)
     {
@@ -132,6 +135,7 @@ int main(int argc, char** argv) {
         cin.ignore();
     }
     clr();
+    
     //Structure used to make the table for the final report
     FnlTbl report[SSIZE];
     for(int i = 0; i < SSIZE; i++)
@@ -149,8 +153,10 @@ int main(int argc, char** argv) {
             << setw(10) << report[0].rnd3 << setw(10) << report[0].ttl << endl;
     cout << setw(15) << left << report[1].name << right << setw(10) << report[1].rnd1 << setw(10) << report[1].rnd2 
         << setw(10) << report[1].rnd3 << setw(10) << report[1].ttl << endl;
+    
     //Get highest score
     cout << "The most amount of points scored in a round was " << srchHi(table, PLYR) << ".\n";
+    
     //Determine who won
     if (*totPtr > *(totPtr + 1))
     {
@@ -168,6 +174,7 @@ int main(int argc, char** argv) {
     {
         cout << "It's a draw. ";
     }
+    
     //High Score Section
     cout << "Press Enter to continue: ";
     cin.ignore();
@@ -193,12 +200,12 @@ int main(int argc, char** argv) {
         //Output what place you got
         disHscr(hScr, HISIZE);
         wtHscr(hScr, HISIZE); //Write the new high score list to file
-        cout << "You are number " << 10 - places << " on the high score list.";
+        cout << "You are number " << HISIZE - places << " on the high score list.";
     }
     else
     {
         disHscr(hScr, HISIZE);
-        cout << "You missed making it onto the top ten scores by " << hScr[0] - totPtr[0] << endl;
+        cout << "You missed making it into the top ten by " << hScr[0] - totPtr[0] << endl;
     }
     //Output the cash back into the file
     ofstream outfile;
@@ -206,13 +213,13 @@ int main(int argc, char** argv) {
     outfile << cash;
     outfile.close();
     delete [] totPtr;
-    totPtr = NULL;
     return 0;
 }
 
 //***********************************grab***************************************
 // Purpose: Simulate grabbing a dice out of the bag and getting a random color
 // Outputs: color -> g = green, r = red, y = yellow
+//******************************************************************************
 char grab()
 {
     char color;
@@ -238,10 +245,12 @@ char grab()
     return (color);	
 }
 
-//***********************************roll****************************************
+//***********************************roll***************************************
 //Purpose: Roll a dice and get a weighted outcome based on the color
 //Input: dice -> the color of dice 
-//Output: rslt -> weighted results, green has the highest positive outcome, reds have the lowest
+//Output: rslt -> weighted results, green has the highest positive outcome, 
+//reds have the lowest, yellows are even
+//******************************************************************************
 char roll(char dice)
 {
     char val, rslt;
@@ -304,6 +313,7 @@ char roll(char dice)
 //Outputs:
 //	rndPts
 //	strike
+//*******************************************************************
 void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &pTurn)
 {
     char rslt = 0, color = 0, rolling = 0; // copied values for color and the value you get from rolling
@@ -320,6 +330,7 @@ void result(unsigned short &rndPts, unsigned short &strike, bool &again, bool &p
         {
             again = false;
         }
+        cin.ignore();
     }
     if (pTurn == false || rolling == 'y')
     {
@@ -398,6 +409,7 @@ void title()
     cin.ignore();
 }
 
+//Purpose: Displays a menu
 void menu()
 {
     cout<<"------------Menu-------------"<<endl;
@@ -418,7 +430,7 @@ void clr()
     cout << endl;
     }
 }
-//*******************************play*************************************
+//*******************************play*******************************************
 //Purpose: Player's turn to play the game
 //Inputs: 
 // again -> play again, true or false
@@ -433,7 +445,7 @@ void clr()
 // strike -> strikes this round
 // totPtr[] -> total scored points 
 // tmName -> the your team name
-//*************************************************************************
+//******************************************************************************
 void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int *totPtr, short &round, string tmName[], int table[][RND], int PLYR)
 {
     while(again == true)
@@ -454,7 +466,6 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
             rndPts = 0;
             again = false;
             strike = 0;
-            cin.ignore();
         }
         else
         {
@@ -467,7 +478,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
         cin.ignore();
     }
 }
-//*************************************oplay****************************************
+//***********************************oplay**************************************
 //Purpose: Have the computer opponent play
 //Inputs: 
 // again -> play again, true or false
@@ -482,7 +493,7 @@ void play(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &stri
 // strike -> strikes this round
 // totPtr[] -> total scored points 
 // oTeam -> the computer's team name
-//**********************************************************************************
+//******************************************************************************
 void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &strike, int *totPtr, short &round, string tmName[], int table[][RND], int PLYR)
 {
     again = true;
@@ -507,14 +518,14 @@ void oplay(bool &again, bool &pTurn, unsigned short &rndPts, unsigned short &str
         }
     }
 }
-//******************************scrBrd****(**************************
+//*********************************scrBrd***************************************
 //Purpose: Keep tally for each of the rounds
 //Inputs:  
 //  table[][RND] -> the table to output
 //  PLYR -> the player row
 //Outputs:
 //  table[PLYR][RND] -> a table with the score for each round so far
-//*******************************************************************
+//******************************************************************************
 void scrBrd (const int table[][RND], int PLYR)
 {
     cout << "Scoreboard:\n";
@@ -528,6 +539,7 @@ void scrBrd (const int table[][RND], int PLYR)
     }
 }
 
+//Purpose: Search for the highest round score
 int srchHi(int table[][RND], int PLYR)
 {
     int high = 0; // highest
@@ -543,16 +555,19 @@ int srchHi(int table[][RND], int PLYR)
     }
     return high;
 }
+
+//Purpose: Displays High Score counting down
 void disHscr(int hScr[], int HISIZE)
 {
-    cout << "  --High Scores--\n";
+    cout << "----High Scores----\n";
     for(int i = HISIZE -1, c = 1; i >= 0; i--, c++)
     {
         cout << "#" << setw(2) << c << "." << setw(15)<< hScr[i] << endl;
     }
-    cout << "---------------\n";
+    cout << "-------------------\n";
 }
 
+//Purpose: Reads file to get high scores
 void rdHscr(int hScr[], int HISIZE)
 {
     ifstream file;
@@ -565,6 +580,7 @@ void rdHscr(int hScr[], int HISIZE)
     file.close();
 }
 
+//Purpose: Writes high scores back into the file
 void wtHscr(int hScr[], int HISIZE)
 {
     ofstream file;
